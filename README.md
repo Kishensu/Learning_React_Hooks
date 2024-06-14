@@ -1,70 +1,201 @@
-# Getting Started with Create React App
+<!-- Learning React Hooks
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is a React application that fetches and displays a list of Pokémon from the PokéAPI. Users can click on a Pokémon to view its details, and navigate to other Pokémon from the detail page.
 
-## Available Scripts
+Features
 
-In the project directory, you can run:
+ • Home Page:
+ • Displays a list of the first 151 Pokémon fetched from the PokéAPI.
+ • Each Pokémon name is a clickable link that navigates to the Pokémon’s detail page.
+ • Pokémon Detail Page:
+ • Displays detailed information about the selected Pokémon, including its name, image, height, weight, and base experience.
+ • Provides links to other Pokémon detail pages.
 
-### `npm start`
+Learning Objectives
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+This project is designed to help users learn about the following React concepts:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+ • useEffect: Hook that allows you to perform side effects in function components.
+ • useParams: Hook from react-router-dom that allows you to access the parameters of the current route.
 
-### `npm test`
+Installation
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+1. Clone the repository:
+git clone <https://github.com/Kishensu/Learning_React_Hooks.git>
+cd Learning React Hooks
 
-### `npm run build`
+2. Instaall dependencies:
+npm install axios react-router-dom
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+3. Start the development server:
+npm start
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Usage
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+ • Open your browser and navigate to <http://localhost:3000/> to view the list of Pokémon.
+ • Click on any Pokémon name to view its details.
+ • Use the links on the detail page to navigate to other Pokémon.
 
-### `npm run eject`
+ Code Structure
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+src/App.js
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Sets up the routing for the application using react-router-dom.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Home from './Home';
+import PokemonDetail from './PokemonDetail';
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+const App = () => {
+    return (
+        <Router>
+            <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/pokemon/:id" element={<PokemonDetail />} />
+            </Routes>
+        </Router>
+    );
+};
 
-## Learn More
+export default App;
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+src/Home.js
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Fetches and displays a list of the first 151 Pokémon from the PokéAPI.
 
-### Code Splitting
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import axios from 'axios';
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+const Home = () => {
+    const [pokemonList, setPokemonList] = useState([]);
 
-### Analyzing the Bundle Size
+    // useEffect with an empty dependency array to fetch data on component mount
+    useEffect(() => {
+        const fetchPokemonList = async () => {
+            try {
+                const response = await axios.get('https://pokeapi.co/api/v2/pokemon?limit=151');
+                setPokemonList(response.data.results);
+            } catch (error) {
+                console.error('Error fetching Pokémon list:', error);
+            }
+        };
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+        fetchPokemonList();
+    }, []); // Empty dependency array ensures this runs only once
 
-### Making a Progressive Web App
+    return (
+        <div>
+            <h1>Pokémon List</h1>
+            <ul>
+                {pokemonList.map((pokemon, index) => (
+                    <li key={index}>
+                        <Link to={`/pokemon/${index + 1}`}>{pokemon.name}</Link>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+};
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+export default Home;
 
-### Advanced Configuration
+src/PokemonDetail.js
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+Fetches and displays detailed information about a Pokémon based on its ID in the URL.
 
-### Deployment
+import React, { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import axios from 'axios';
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+const PokemonDetail = () => {
+    const { id } = useParams(); // Retrieve the 'id' parameter from the URL
+    const [pokemon, setPokemon] = useState(null);
 
-### `npm run build` fails to minify
+    console.log('PokemonDetail component rendered');
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+    // useEffect with no dependency array
+    useEffect(() => {
+        console.log('useEffect with no dependency array called');
+    });
+
+    // useEffect with an empty dependency array
+    useEffect(() => {
+        console.log('useEffect with empty dependency array called');
+        const fetchPokemon = async () => {
+            try {
+                const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${id}`);
+                setPokemon(response.data);
+            } catch (error) {
+                console.error('Error fetching Pokémon data:', error);
+            }
+        };
+
+        fetchPokemon();
+    }, []); // Empty dependency array ensures this runs only once
+
+    // useEffect with dependencies (id)
+    useEffect(() => {
+        console.log('useEffect with [id] dependency array called');
+        const fetchPokemon = async () => {
+            try {
+                const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${id}`);
+                setPokemon(response.data);
+            } catch (error) {
+                console.error('Error fetching Pokémon data:', error);
+            }
+        };
+
+        fetchPokemon();
+    }, [id]); // This effect runs when the 'id' parameter changes
+
+    if (!pokemon) {
+        return <div>Loading...</div>;
+    }
+
+    return (
+        <div>
+            <h1>{pokemon.name}</h1>
+            <img src={pokemon.sprites.front_default} alt={pokemon.name} />
+            <p>Height: {pokemon.height}</p>
+            <p>Weight: {pokemon.weight}</p>
+            <p>Base Experience: {pokemon.base_experience}</p>
+            <div>
+                <h2>Other Pokémon</h2>
+                <ul>
+                    {Array.from({ length: 151 }, (_, i) => (
+                        <li key={i}>
+                            <Link to={`/pokemon/${i + 1}`}>Pokémon {i + 1}</Link>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        </div>
+    );
+};
+
+export default PokemonDetail;
+
+Understanding useEffect and useParams
+
+useEffect
+
+ • Purpose: useEffect allows you to perform side effects in function components. Side effects can include data fetching, subscriptions, and manually changing the DOM.
+ • Usage:
+ • No Dependency Array: Runs on every render.
+ • Empty Dependency Array: Runs once when the component mounts.
+ • With Dependencies: Runs when the component mounts and when any of the dependencies change.
+
+useParams
+
+ • Purpose: useParams is a hook from react-router-dom that allows you to access the parameters of the current route.
+ • Usage: const { id } = useParams();
+ • This retrieves the id parameter from the URL, allowing you to use it within your component.
+    Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request with your changes.
+
+License
+
+This project is licensed under the MIT License. -->
